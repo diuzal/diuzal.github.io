@@ -791,7 +791,9 @@ function demoMotion(container){
       const r=(i*spacing+offset)%maxR;
       if(r<1)continue;
       const norm=r/maxR;
-      ctx.strokeStyle=`rgba(255,255,255,${0.12+(1-norm)*0.72})`;
+      const edgeFade=Math.max(0,Math.min(1,(maxR-r)/34));
+      const alpha=(0.12+(1-norm)*0.72)*edgeFade;
+      ctx.strokeStyle=`rgba(255,255,255,${alpha})`;
       ctx.lineWidth=2;
       ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
     }
