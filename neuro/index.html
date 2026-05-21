@@ -349,7 +349,7 @@ const CARDS = [
 const G = {
   teams:['Team A','Team B'], scores:[0,0],
   active:0, deck:[], pos:0, card:null, phase:'setup', challenger:null, choice:null,
-  timerMax:30, timerLeft:0, timerInt:null, rAF:null,
+  timerMax:60, timerLeft:0, timerInt:null, rAF:null,
 };
 
 
@@ -522,7 +522,7 @@ function renderPhase(){
         <div class="card-q">${c.q}</div>
         ${choiceMarkup(c,'reveal')}
         <div class="timer-wrap">
-          <div class="timer-head"><span>30 seconds</span><span id="tlbl">30s</span></div>
+          <div class="timer-head"><span>60 seconds</span><span id="tlbl">60s</span></div>
           <div class="timer-track"><div id="tbar" class="timer-bar" style="width:100%;background:#4ade80"></div></div>
         </div>
       </div>
@@ -530,7 +530,7 @@ function renderPhase(){
         <button class="btn ${BC}" onclick="setPhase('reveal')">Reveal Answer</button>
         <button class="btn btn-ghost" onclick="startOppChallenge()">Pass Unrevealed to Opponent</button>
       </div>`);
-    startTimer(30,()=>setPhase('reveal'));
+    startTimer(60,()=>setPhase('reveal'));
     break;
   }
 
@@ -565,14 +565,14 @@ function renderPhase(){
         <div class="card-q">${c.q}</div>
         ${choiceMarkup(c,'opp_reveal')}
         <div class="timer-wrap">
-          <div class="timer-head"><span>30 seconds</span><span id="tlbl">30s</span></div>
+          <div class="timer-head"><span>60 seconds</span><span id="tlbl">60s</span></div>
           <div class="timer-track"><div id="tbar" class="timer-bar" style="width:100%;background:#4ade80"></div></div>
         </div>
       </div>
       <div class="btn-row">
         <button class="btn ${OB}" onclick="setPhase('opp_reveal')">Reveal Answer</button>
       </div>`);
-    startTimer(30,()=>setPhase('opp_reveal'));
+    startTimer(60,()=>setPhase('opp_reveal'));
     break;
   }
 
