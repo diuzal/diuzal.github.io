@@ -79,6 +79,19 @@ body{background:var(--bg);color:var(--text);font-family:'Manrope',system-ui,-app
 .card-a.gold{border-left-color:var(--gold)}
 .a-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
 .a-text{font-size:clamp(1rem,1.05vw,1.15rem);line-height:1.55}
+.choice-note{color:var(--dim);font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 18px}
+.choice{background:var(--surf2);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;display:flex;align-items:flex-start;gap:11px;line-height:1.45;padding:13px 14px;text-align:left;transition:border-color .15s,background .15s,opacity .15s}
+.choice:hover{border-color:var(--t1);background:#222742}
+.choice:disabled{cursor:default;opacity:1}
+.choice-key{align-items:center;background:rgba(255,255,255,.08);border-radius:999px;color:var(--dim);display:flex;flex:0 0 25px;font-size:.78rem;font-weight:800;height:25px;justify-content:center}
+.choice.correct{background:rgba(74,222,128,.13);border-color:var(--ok)}
+.choice.correct .choice-key{background:var(--ok);color:#06120a}
+.choice.wrong{background:rgba(224,82,82,.13);border-color:var(--t0)}
+.choice.wrong .choice-key{background:var(--t0);color:#fff}
+.choice-result{border-radius:8px;font-size:.92rem;font-weight:700;line-height:1.45;margin-bottom:14px;padding:11px 13px}
+.choice-result.correct{background:rgba(74,222,128,.13);color:var(--ok)}
+.choice-result.wrong{background:var(--t0d);color:#f5a0a0}
 
 /* ── Timer ── */
 .timer-wrap{margin:4px 0 18px}
@@ -125,7 +138,7 @@ canvas{border-radius:8px;display:block;max-width:100%}
 .end-scard.winner .end-spts{color:var(--gold)}
 .end-sub{font-size:.8rem;color:var(--dim)}
 hr.sep{border:none;border-top:1px solid var(--border);margin:14px 0}
-@media(max-width:700px){body{padding:0 12px}.screen{width:100%}.setup-row{flex-direction:column}.card-q{font-size:1rem}#screen-game{padding-top:8px}.card{padding:22px}.hud-team{padding:8px 10px}}
+@media(max-width:700px){body{padding:0 12px}.screen{width:100%}.setup-row{flex-direction:column}.card-q{font-size:1rem}#screen-game{padding-top:8px}.card{padding:22px}.hud-team{padding:8px 10px}.choice-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -176,98 +189,156 @@ const CARDS = [
   // — LESION (10) —
   {type:'lesion',
    q:`A patient loses vision in the right visual field of both eyes.`,
+   choices:[`Left optic tract`, `Right optic nerve`, `Middle optic chiasm`, `Right inferotemporal cortex`],
+   correct:0,
    a:`Left optic tract lesion. After the chiasm, each optic tract carries the opposite visual hemifield, so the left tract represents the right visual field (Bear et al., pp. 312-314).`},
   {type:'lesion',
    q:`A tumor pressing on the middle of the optic chiasm causes loss of peripheral vision on both sides.`,
+   choices:[`Optic chiasm crossing fibers`, `Left optic nerve`, `Area MT/V5`, `Parvocellular LGN layers`],
+   correct:0,
    a:`Optic chiasm, especially the crossing nasal-retina fibers. Damage here produces bitemporal field loss because nasal retinal fibers carry the temporal/peripheral visual fields (Bear et al., pp. 312-314).`},
   {type:'lesion',
    q:`Complete blindness in the left eye only; the right eye is still normal.`,
+   choices:[`Left optic nerve`, `Left optic tract`, `Right V1 foveal map`, `Optic chiasm midline`],
+   correct:0,
    a:`Left optic nerve lesion. Before the chiasm, an optic nerve carries information from one eye only (Bear et al., pp. 311-314).`},
   {type:'lesion',
    q:`A patient can describe objects, but cannot readily recognize familiar faces.`,
+   choices:[`Inferotemporal ventral face pathway`, `Optic disk`, `Magnocellular LGN pathway`, `Primary rod phototransduction`],
+   correct:0,
    a:`Inferotemporal / ventral stream face-processing damage, producing prosopagnosia: difficulty recognizing faces despite otherwise usable vision (Bear et al., pp. 336-337).`},
   {type:'lesion',
    q:`A patient sees objects clearly but has trouble perceiving smooth motion, like pouring tea or crossing a street.`,
+   choices:[`Area MT/V5 in the dorsal stream`, `Ventral color area around V4`, `Left optic nerve`, `Foveal cone mosaic`],
+   correct:0,
    a:`Area MT/V5 in the dorsal stream. MT is specialized for object motion, and damage near MT/MST can selectively disrupt visual motion perception (Bear et al., pp. 334-336).`},
   {type:'lesion',
    q:`A patient loses color perception even though the retinal cones still work.`,
+   choices:[`Ventral occipital/temporal color pathway`, `Optic tract hemifield pathway`, `Dorsal reaching pathway`, `Optic disk blind spot`],
+   correct:0,
    a:`Ventral occipital/temporal color-processing damage, often discussed around V4 and cortical achromatopsia. The problem is central, not missing cone photopigment (Bear et al., p. 336).`},
   {type:'lesion',
    q:`A patient recognizes objects, but cannot use vision well to locate them or guide reaching.`,
+   choices:[`Dorsal occipital-parietal stream`, `Ventral inferotemporal stream`, `Optic chiasm nasal fibers`, `Red-green cone pigments`],
+   correct:0,
    a:`Dorsal stream / occipital-parietal pathway damage. This stream supports visual motion analysis and visual control of action (Bear et al., pp. 333-336).`},
   {type:'lesion',
    q:`A small lesion removes the V1 tissue representing the fovea. What visual problem is most likely?`,
+   choices:[`Central scotoma and poor high-acuity vision`, `Only loss of the left eye`, `Only smooth-motion blindness`, `Bitemporal peripheral field loss`],
+   correct:0,
    a:`A central scotoma with poor high-acuity vision. The fovea is overrepresented in the retinotopic map, so central visual field damage has a large cortical footprint (Bear et al., pp. 319-320).`},
   {type:'lesion',
    q:`Damage to parvocellular LGN layers is most likely to weaken which kind of vision?`,
+   choices:[`Fine detail and color`, `Biological rhythms only`, `Radial motion only`, `Blind-spot filling only`],
+   correct:0,
    a:`Fine detail and color. P-type ganglion cells project to parvocellular LGN layers; M-type cells project to magnocellular layers and are more motion-sensitive (Bear et al., pp. 316-317).`},
   {type:'lesion',
    q:`A person has normal acuity, but confuses red and green across everyday objects.`,
+   choices:[`L/M cone photopigment comparison`, `Optic nerve from one whole eye`, `Dorsal reaching stream`, `Orientation columns in V1`],
+   correct:0,
    a:`A cone photopigment problem affecting the L/M cone comparison, not a general blindness. Red-green color blindness is commonly tied to missing or abnormal red/green cone pigments (Bear et al., p. 317).`},
 
   // — MECHANISM (15) —
   {type:'mechanism',
    q:`Why can a faint star disappear when you stare straight at it, but return when you look slightly beside it?`,
+   choices:[`Looking aside places it on more light-sensitive peripheral rods`, `Looking aside sends it through the optic chiasm twice`, `Direct fixation activates only motion area MT`, `Direct fixation blocks all retinal ganglion cells`],
+   correct:0,
    a:`Direct fixation puts the star on foveal cones, which need more light. Looking aside places it on peripheral rods, which are more sensitive in scotopic vision (Bear et al., pp. 310-311).`},
   {type:'mechanism',
    q:`Why does the rod system detect dim light better than the cone system?`,
+   choices:[`Rods are highly light-sensitive and converge for summation`, `Rods have the best one-to-one foveal wiring`, `Rods cross only at the optic chiasm`, `Rods code faces in inferotemporal cortex`],
+   correct:0,
    a:`Rods are more light-sensitive and show greater peripheral convergence, allowing summation. The trade-off is poorer spatial resolution (Bear et al., pp. 310-311, 315).`},
   {type:'mechanism',
    q:`Why does foveal cone vision give high visual acuity?`,
+   choices:[`Low convergence preserves precise location detail`, `High rod convergence blurs all central signals`, `Nasal fibers avoid the LGN`, `Motion aftereffects sharpen cone pigments`],
+   correct:0,
    a:`Foveal cones have very low convergence, approaching one-to-one wiring with ganglion cells, so location details are preserved (Bear et al., pp. 310-311).`},
   {type:'mechanism',
    q:`In darkness, are photoreceptors relatively depolarized or hyperpolarized? What changes in light?`,
+   choices:[`Depolarized in darkness; light hyperpolarizes them`, `Hyperpolarized in darkness; light depolarizes them`, `Silent in darkness; light destroys the optic nerve`, `Depolarized in both states with no channel change`],
+   correct:0,
    a:`They are depolarized in the dark by the dark current. Light lowers cGMP, closes Na+ channels, and hyperpolarizes the photoreceptor (Bear et al., pp. 312-315).`},
   {type:'mechanism',
    q:`What molecule changes shape when light activates rhodopsin?`,
+   choices:[`Retinal`, `Glutamate`, `cGMP-gated Na+ channel`, `Parvocellular layer`],
+   correct:0,
    a:`Retinal changes from an inactive cis conformation to an activated trans conformation inside the opsin protein (Bear et al., pp. 313-314).`},
   {type:'mechanism',
    q:`Why do ON and OFF bipolar cells respond oppositely to light?`,
+   choices:[`They use different glutamate responses as photoreceptor release changes`, `They receive input from different cerebral hemispheres only`, `They swap rods and cones at the optic disk`, `They are simple and complex cells in area MT`],
+   correct:0,
    a:`Photoreceptors change glutamate release with light. OFF bipolar cells depolarize to glutamate, while ON bipolar cells use G-protein-coupled receptors and depolarize when light reduces glutamate (Bear et al., pp. 321-322).`},
   {type:'mechanism',
    q:`What makes retinal ganglion cells good at detecting edges and contrast?`,
+   choices:[`Center-surround receptive fields compare neighboring light`, `All visual fields cross without comparison`, `Face recognition columns cancel color`, `The optic disk contains extra photoreceptors`],
+   correct:0,
    a:`Their receptive fields are center-surround: light in the center and surround has opposite effects, so uniform light cancels but edges change firing strongly (Bear et al., pp. 323-324).`},
   {type:'mechanism',
    q:`Why does staring at a colored bird produce a bird in complementary colors afterward?`,
+   choices:[`Local adaptation and color-opponent processing shift responses`, `The optic nerve changes eyes after staring`, `Foveal cones become rods permanently`, `Retinotopy removes complementary colors`],
+   correct:0,
    a:`Trichromatic coding alone is not enough; color-opponent processing and local adaptation help produce complementary afterimages (Bear et al., pp. 318-319, 325).`},
   {type:'mechanism',
    q:`At the optic chiasm, which retinal fibers cross?`,
+   choices:[`Nasal retinal fibers`, `Temporal retinal fibers`, `All cone fibers but no rod fibers`, `Only retinal ganglion cell center fields`],
+   correct:0,
    a:`Nasal retinal fibers cross; temporal retinal fibers stay ipsilateral. This makes each hemisphere represent the contralateral visual field (Bear et al., pp. 312-313).`},
   {type:'mechanism',
    q:`What are the three main destinations mentioned for optic tract information?`,
+   choices:[`LGN plus hypothalamic and midbrain targets`, `Only V4, MT, and inferotemporal cortex`, `Rods, cones, and bipolar cells`, `Simple, complex, and color-opponent cells`],
+   correct:0,
    a:`Most goes to LGN for conscious vision; some goes to hypothalamic and midbrain targets, including pathways for biological rhythms, pupil control, and eye movements (Bear et al., pp. 313-315).`},
   {type:'mechanism',
    q:`How are signals organized inside the LGN?`,
+   choices:[`By eye of origin and ganglion-cell type`, `By face familiarity only`, `By dominant hand and reaching speed`, `By retinal blind-spot size only`],
+   correct:0,
    a:`They are segregated by eye of origin and ganglion-cell type. Layers 1-2 are magnocellular, layers 3-6 parvocellular, with koniocellular layers between (Bear et al., pp. 316-318).`},
   {type:'mechanism',
    q:`What does retinotopy mean in V1?`,
+   choices:[`Neighboring retinal points map to neighboring visual targets`, `Each eye projects to a random cortical map`, `Only color reaches cortex`, `V1 stores names for familiar faces`],
+   correct:0,
    a:`Neighboring points on the retina project to neighboring points in LGN and V1. The map is distorted because central vision is overrepresented (Bear et al., pp. 319-320).`},
   {type:'mechanism',
    q:`Why does a V1 simple cell prefer one bar orientation?`,
+   choices:[`Aligned earlier inputs form an elongated oriented receptive field`, `Its blind spot rotates the bar`, `Its rods choose a face category`, `The optic chiasm turns color into motion`],
+   correct:0,
    a:`Aligned inputs from earlier center-surround cells create an elongated receptive field. The cell is position- and orientation-selective with distinct excitatory and inhibitory zones (Bear et al., pp. 325-327).`},
   {type:'mechanism',
    q:`What is the key difference between simple and complex cells in V1?`,
+   choices:[`Complex cells tolerate more position shift than simple cells`, `Simple cells represent rods; complex cells represent cones`, `Complex cells cross at the optic chiasm; simple cells do not`, `Simple cells see faces; complex cells see only red`],
+   correct:0,
    a:`Both can be orientation-selective, but simple cells have clear excitatory/inhibitory subregions and strong position selectivity; complex cells tolerate more position shift within the receptive field (Bear et al., pp. 327-328).`},
   {type:'mechanism',
    q:`How does binocular disparity help depth perception?`,
+   choices:[`The two eyes' slightly different images provide a depth cue`, `The fovea removes one eye's image`, `The optic disk adds photoreceptors for depth`, `Color afterimages replace motion cues`],
+   correct:0,
    a:`The two eyes receive slightly different images. The difference is larger for close objects, and binocular neurons use the disparity to support depth perception (Bear et al., pp. 324, 338-340).`},
 
   // — CHALLENGE (4) —
   {type:'challenge', id:'blindspot',
    title:'Blind Spot Finder',
    desc:'A red dot will move slowly across the screen. <strong>Close your left eye</strong>, stare at the white + cross with your right eye — do not move your gaze — and <strong>click the moment the dot disappears</strong>. You will be locating your actual optic disc.',
+   choices:[`The optic disk has no photoreceptors where the optic nerve exits`, `The fovea stops encoding all red objects`, `MT/V5 removes still dots from awareness`, `The optic chiasm blocks one hemifield during fixation`],
+   correct:0,
    a:'The blind spot is the optic disk, where optic nerve fibers and retinal vessels leave the eye. There are no photoreceptors there, yet perception usually appears seamless (Bear et al., pp. 297-298).'},
   {type:'challenge', id:'afterimage',
    title:'Colour Afterimage',
    desc:'<strong>Stare at the central dot</strong> in the displayed image for 20 seconds without moving your eyes. The screen will then switch to grey — keep staring at the dot and report what colours you see.',
+   choices:[`Adaptation and opponent-color processing create the negative afterimage`, `The optic nerve crosses after twenty seconds`, `V1 erases foveal retinotopy`, `Rod convergence creates face blindness`],
+   correct:0,
    a:'A negative afterimage appears because local color adaptation and color-opponent processing shift the response after prolonged stimulation (Bear et al., pp. 318-319, 325).'},
   {type:'challenge', id:'motion',
    title:'Motion Aftereffect',
    desc:'<strong>Watch the expanding rings for 15 seconds</strong>, keeping your eyes fixed on the centre dot. When the rings stop, continue staring — the static rings should appear to contract.',
+   choices:[`Direction-selective motion channels adapt after sustained motion`, `Retinal fibers uncross at the chiasm`, `Cones become rods for fifteen seconds`, `Parvocellular layers stop coding color permanently`],
+   correct:0,
    a:'Sustained motion adapts direction-selective motion channels. Area MT/V5 is central for motion processing, and dorsal stream areas beyond MT include neurons sensitive to radial motion such as expansion and contraction (Bear et al., pp. 334-335).'},
   {type:'challenge', id:'dominanteye',
    title:'Dominant Eye Test',
    desc:'Make a small <strong>triangle with your hands</strong>, center a distant object in it with both eyes open, then test which eye keeps the target aligned.',
+   choices:[`The aligned eye is dominant, consistent with cortical eye preference`, `The aligned eye has no optic disk`, `The misaligned eye has no cones`, `Both eyes have swapped optic tracts`],
+   correct:0,
    a:'The eye that keeps the distant target centered when the other eye closes is the dominant eye. In V1, inputs from the two eyes are organized into ocular dominance columns, and many cortical neurons show eye preference (Bear et al., pp. 322-324).'},
 ];
 
@@ -277,7 +348,7 @@ const CARDS = [
 // ═══════════════════════════════════
 const G = {
   teams:['Team A','Team B'], scores:[0,0],
-  active:0, deck:[], pos:0, card:null, phase:'setup', challenger:null,
+  active:0, deck:[], pos:0, card:null, phase:'setup', challenger:null, choice:null,
   timerMax:30, timerLeft:0, timerInt:null, rAF:null,
 };
 
@@ -291,12 +362,17 @@ function shuffle(a) {
   for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
+function shuffledCardChoices(card){
+  const choices=shuffle(card.choices.map((text,i)=>({text,correct:i===card.correct})));
+  return {...card,choices:choices.map(choice=>choice.text),correct:choices.findIndex(choice=>choice.correct)};
+}
 function stopTimer(){clearInterval(G.timerInt);G.timerInt=null;}
 function stopRAF(){if(G.rAF){cancelAnimationFrame(G.rAF);G.rAF=null;}}
 function stopAll(){stopTimer();stopRAF();}
 function cardsLeft(){return G.deck.length-G.pos;}
 function tc(i){return i===0?'var(--t0)':'var(--t1)';}
 function btnCls(i){return i===0?'btn-lesion':'btn-mech';}
+function choiceGrade(c){return G.choice===c.correct;}
 
 
 // ═══════════════════════════════════
@@ -324,7 +400,7 @@ function updateHUD(){
 // ═══════════════════════════════════
 function startGame(){
   G.teams=[$('inp-t1').value.trim()||'Team A', $('inp-t2').value.trim()||'Team B'];
-  G.scores=[0,0]; G.active=0; G.deck=shuffle(CARDS); G.pos=0; G.card=null; G.challenger=null;
+  G.scores=[0,0]; G.active=0; G.deck=shuffle(CARDS.map(shuffledCardChoices)); G.pos=0; G.card=null; G.challenger=null; G.choice=null;
   showScreen('game'); updateHUD(); drawCard();
 }
 
@@ -336,7 +412,7 @@ function setPhase(p){stopAll();G.phase=p;updateHUD();renderPhase();}
 
 function drawCard(){
   if(G.pos>=G.deck.length){setPhase('end');return;}
-  G.card=G.deck[G.pos++]; G.challenger=null; updateHUD();
+  G.card=G.deck[G.pos++]; G.challenger=null; G.choice=null; updateHUD();
   setPhase(G.card.type==='challenge'?'ch_intro':'question');
 }
 
@@ -358,6 +434,7 @@ function doOppCorrect(){awardPts(G.challenger ?? (1-G.active),1);_afterAward();}
 function doOppWrong(){_afterAward();}
 function doCh1(){awardPts(G.active,1);_afterAward();}
 function doCh0(){_afterAward();}
+function chooseAnswer(i,phase){G.choice=i;setPhase(phase);}
 function _afterAward(){if(checkEnd()){setPhase('end');}else{setPhase('next_turn');}}
 function passToNext(){G.active=1-G.active;updateHUD();drawCard();}
 
@@ -389,6 +466,36 @@ function _timerDOM(){
 // ═══════════════════════════════════
 function setArea(h){$('card-area').innerHTML=h;}
 function setBanner(h){$('turn-banner').innerHTML=h;}
+function choiceMarkup(c,revealPhase,locked=false){
+  const keys=['A','B','C','D'];
+  return `
+    <div class="choice-note">${locked?(G.choice===null?'Answer options':'Selected answer'):'Select one answer'}</div>
+    <div class="choice-grid">
+      ${c.choices.map((choice,i)=>{
+        const correct=locked&&i===c.correct;
+        const wrong=locked&&i===G.choice&&i!==c.correct;
+        const state=correct?' correct':wrong?' wrong':'';
+        const action=locked?'disabled':`onclick="chooseAnswer(${i},'${revealPhase}')"`;
+        return `<button class="choice${state}" ${action}>
+          <span class="choice-key">${keys[i]}</span>
+          <span>${choice}</span>
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+function choiceResult(c){
+  if(G.choice===null)return '';
+  const ok=choiceGrade(c);
+  return `<div class="choice-result ${ok?'correct':'wrong'}">${ok?'Correct choice.':'That choice is not correct.'} Read the explanation before continuing.</div>`;
+}
+function scoredChoiceActions(c,correctFn,wrongFn){
+  if(G.choice===null)return `
+    <button class="btn btn-ok" onclick="${correctFn}()">&#10003; Correct (+1 pt)</button>
+    <button class="btn btn-ghost" onclick="${wrongFn}()">&#10007; Wrong (0 pts)</button>`;
+  return choiceGrade(c)
+    ? `<button class="btn btn-ok" onclick="${correctFn}()">Continue (+1 pt)</button>`
+    : `<button class="btn btn-ghost" onclick="${wrongFn}()">Continue (0 pts)</button>`;
+}
 
 function renderPhase(){
   const c=G.card;
@@ -413,6 +520,7 @@ function renderPhase(){
       <div class="card">
         <span class="badge ${isL?'badge-lesion':'badge-mech'}">${isL?'&#11044; Lesion':'&#9650; Mechanism'} &nbsp;1 pt</span>
         <div class="card-q">${c.q}</div>
+        ${choiceMarkup(c,'reveal')}
         <div class="timer-wrap">
           <div class="timer-head"><span>30 seconds</span><span id="tlbl">30s</span></div>
           <div class="timer-track"><div id="tbar" class="timer-bar" style="width:100%;background:#4ade80"></div></div>
@@ -434,6 +542,8 @@ function renderPhase(){
       <div class="card">
         <span class="badge ${isL?'badge-lesion':'badge-mech'}">${isL?'&#11044; Lesion':'&#9650; Mechanism'} &nbsp;1 pt</span>
         <div class="card-q">${c.q}</div>
+        ${choiceMarkup(c,'reveal',true)}
+        ${choiceResult(c)}
         <hr class="sep">
         <div class="card-a ${isL?'lesion':'mech'}">
           <div class="a-label">Answer</div>
@@ -441,8 +551,7 @@ function renderPhase(){
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-ok" onclick="doCorrect()">&#10003; Correct (+1 pt)</button>
-        <button class="btn btn-ghost" onclick="doWrong()">&#10007; Wrong (0 pts)</button>
+        ${scoredChoiceActions(c,'doCorrect','doWrong')}
       </div>`);
     break;
   }
@@ -454,6 +563,7 @@ function renderPhase(){
       <div class="card">
         <span class="badge ${c.type==='lesion'?'badge-lesion':'badge-mech'}">${c.type==='lesion'?'&#11044; Lesion':'&#9650; Mechanism'}</span>
         <div class="card-q">${c.q}</div>
+        ${choiceMarkup(c,'opp_reveal')}
         <div class="timer-wrap">
           <div class="timer-head"><span>30 seconds</span><span id="tlbl">30s</span></div>
           <div class="timer-track"><div id="tbar" class="timer-bar" style="width:100%;background:#4ade80"></div></div>
@@ -474,6 +584,8 @@ function renderPhase(){
       <div class="card">
         <span class="badge ${c.type==='lesion'?'badge-lesion':'badge-mech'}">${c.type==='lesion'?'&#11044; Lesion':'&#9650; Mechanism'} &nbsp;1 pt</span>
         <div class="card-q">${c.q}</div>
+        ${choiceMarkup(c,'opp_reveal',true)}
+        ${choiceResult(c)}
         <hr class="sep">
         <div class="card-a ${c.type==='lesion'?'lesion':'mech'}">
           <div class="a-label">Answer</div>
@@ -481,8 +593,7 @@ function renderPhase(){
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-ok" onclick="doOppCorrect()">&#10003; Correct (+1 pt)</button>
-        <button class="btn btn-ghost" onclick="doOppWrong()">&#10007; Wrong (0 pts)</button>
+        ${scoredChoiceActions(c,'doOppCorrect','doOppWrong')}
       </div>`);
     break;
   }
@@ -547,7 +658,8 @@ function renderPhase(){
     setArea(`
       <div class="card" style="border-color:var(--gold)">
         <span class="badge badge-gold">&#9670; Mechanism Question</span>
-        <div class="card-q">You experienced the demo. Now explain: <strong>what is the neurological mechanism behind what you just saw?</strong></div>
+        <div class="card-q">You experienced the demo. Which neurological mechanism best explains what you just saw?</div>
+        ${choiceMarkup(c,'ch_reveal')}
         <div class="timer-wrap" style="margin-top:16px">
           <div class="timer-head"><span>45 seconds to discuss</span><span id="tlbl">45s</span></div>
           <div class="timer-track"><div id="tbar" class="timer-bar" style="width:100%;background:#4ade80"></div></div>
@@ -565,7 +677,9 @@ function renderPhase(){
     setArea(`
       <div class="card" style="border-color:var(--gold)">
         <span class="badge badge-gold">&#9670; ${c.title}</span>
-        <div class="card-q">What is the neurological mechanism?</div>
+        <div class="card-q">Which neurological mechanism best explains it?</div>
+        ${choiceMarkup(c,'ch_reveal',true)}
+        ${choiceResult(c)}
         <hr class="sep">
         <div class="card-a gold">
           <div class="a-label">Answer</div>
@@ -573,8 +687,7 @@ function renderPhase(){
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-gold" onclick="doCh1()">&#10003; Correct (+1 pt)</button>
-        <button class="btn btn-ghost btn-sm" onclick="doCh0()">Wrong (0 pts)</button>
+        ${scoredChoiceActions(c,'doCh1','doCh0')}
       </div>`);
     break;
 
